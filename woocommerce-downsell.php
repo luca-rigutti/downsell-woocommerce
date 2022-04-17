@@ -14,20 +14,24 @@
   {
       class woocommerceDownsell
       {
+        public function getProductIds($postId)
+        {
+          global $wpdb;
+          $product_id_downsell = intval( $postId );
+          $query = "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '_upsell_ids' and meta_value like '%i:".$product_id_downsell."%'";
+          $product_ids = $wpdb->get_results( $query, OBJECT );
+          return $product_ids;
+        }
         public function showDownsell()
         {
-
           ?>
           <div class="options_group">
             <p class="form-field">
               <label for="downsell_ids"><?php esc_html_e( 'Downsell', 'woocommerce' ); ?></label>
               <select class="wc-product-search" multiple="multiple" style="width: 50%;" id="downsell_ids" name="downsell_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-exclude="<?php echo intval( $post->ID ); ?>">
                 <?php
-                        global $wpdb;
-                        $product_id_downsell = intval( $post->ID );
-                        $query = "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '_upsell_ids' and meta_value like '%i:".$product_id_downsell."%'";
-                        $product_ids = $wpdb->get_results( $query, OBJECT );
 
+                      $product_ids = $this->getProductIds(wc_get_product()->get_id()); //$post->ID
                 /*
                   This template is from this file: websiteFolder/wp-content/plugins/woocommerce/includes/admin/meta-boxes/views/html-product-data-linked-products.php
                   https://stackoverflow.com/questions/56404003/in-woocommerce-how-to-find-all-products-for-which-a-certain-product-is-a-cross
