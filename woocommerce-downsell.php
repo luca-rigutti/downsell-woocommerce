@@ -51,9 +51,21 @@
           <?php
         }
 
+        public function saveDownsell($postId)
+        {
+          //Other doc: https://stackoverflow.com/questions/45199599/how-to-add-more-custom-field-in-linked-product-of-woocommerce
+          $downsellIds = $_POST['downsell_ids'];
+          //TODO: Check if the id are valid
+          /*
+            TODO: Get all ids from getProductIds, then if the id is not set on $downsellIds, need to remove
+                  In the same time, remove id from $downsellIds if match. What remains on the Array is the new id to add,
+                  so foreach that,load the product and adding the new upsell $postId
+        }
+
         public function __construct()
         {
             add_action("woocommerce_product_options_related",array($this, "showDownsell"));
+            add_action( 'woocommerce_process_product_meta', array($this,'saveDownsell') );
         }
       }
     }
