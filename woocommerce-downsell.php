@@ -53,13 +53,42 @@
 
         public function saveDownsell($postId)
         {
-          //Other doc: https://stackoverflow.com/questions/45199599/how-to-add-more-custom-field-in-linked-product-of-woocommerce
-          $downsellIds = $_POST['downsell_ids'];
-          //TODO: Check if the id are valid
-          /*
-            TODO: Get all ids from getProductIds, then if the id is not set on $downsellIds, need to remove
-                  In the same time, remove id from $downsellIds if match. What remains on the Array is the new id to add,
-                  so foreach that,load the product and adding the new upsell $postId
+
+          if($postId!="")
+          {
+
+            //Other doc: https://stackoverflow.com/questions/45199599/how-to-add-more-custom-field-in-linked-product-of-woocommerce
+            $downsellIds = $_POST['downsell_ids'];
+            //TODO: Check if the id are valid
+            /*
+              TODO: Get all ids from getProductIds, then if the id is not set on $downsellIds, need to remove
+                    In the same time, remove id from $downsellIds if match. What remains on the Array is the new id to add,
+                    so foreach that,load the product and adding the new upsell $postId
+                    */
+
+            $upsellList = $this->getProductIds($postId);
+            //throw new Exception('$downsellIds:'.json_encode($downsellIds)." with: ". json_encode($upsellList));
+
+            foreach($upsellList as $upsell )
+              if(!in_array($upsell->post_id,$downsellIds))
+              {
+                $productToChange = wc_get_product($upsell->post_id);
+                $upsellIdsOfProduct = $productToChange-> get_upsell_ids();
+                $productToChange->set_upsell_ids(array_diff($upsellIdsOfProduct,[$postId]));
+                $productToChange->save();
+              }
+              else
+                $downsellIds = array_diff($downsellIds,[$upsell->post_id]);
+            foreach($downsellIds as $downsellId)
+              {
+                $productToChange = wc_get_product($downsellId);
+                $upsellIdsOfProduct = $productToChange-> get_upsell_ids();
+                array_push($upsellIdsOfProduct,intval($postId));
+                $productToChange->set_upsell_ids($upsellIdsOfProduct);
+                $productToChange->save();
+              }
+            }
+
         }
 
         public function __construct()
